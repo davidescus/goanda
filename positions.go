@@ -35,21 +35,41 @@ type ClosePositionPayload struct {
 	ShortUnits string `json: "shortUnits"`
 }
 
-func (c *OandaConnection) GetOpenPositions() OpenPositions {
+func (c *OandaConnection) GetOpenPositions() (OpenPositions, error) {
 	endpoint := "/accounts/" + c.accountID + "/openPositions"
 
-	response := c.Request(endpoint)
 	data := OpenPositions{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) ClosePosition(instrument string, body ClosePositionPayload) ModifiedTrade {
+func (c *OandaConnection) ClosePosition(instrument string, body ClosePositionPayload) (ModifiedTrade, error) {
 	endpoint := "/accounts/" + c.accountID + "/positions/" + instrument + "/close"
-	jsonBody, err := json.Marshal(body)
-	checkErr(err)
-	response := c.Update(endpoint, jsonBody)
+
 	data := ModifiedTrade{}
-	unmarshalJson(response, &data)
-	return data
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		return data, err
+	}
+
+	response, err := c.Put(endpoint, jsonBody)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }

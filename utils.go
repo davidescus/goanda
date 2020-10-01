@@ -3,6 +3,8 @@ package goanda
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,17 +17,8 @@ func checkErr(err error) {
 	}
 }
 
-func checkApiErr(body []byte, route string) {
-	bodyString := string(body[:])
-	if strings.Contains(bodyString, "errorMessage") {
-		log.SetFlags(log.LstdFlags | log.Llongfile)
-		log.Fatal("\nOANDA API Error: " + bodyString + "\nOn route: " + route)
-	}
-}
-
-func unmarshalJson(body []byte, data interface{}) {
-	jsonErr := json.Unmarshal(body, &data)
-	checkErr(jsonErr)
+func unmarshalJson(body []byte, data interface{}) error {
+	return json.Unmarshal(body, &data)
 }
 
 func createUrl(host string, endpoint string) string {
@@ -38,15 +31,25 @@ func createUrl(host string, endpoint string) string {
 	return url
 }
 
-func makeRequest(c *OandaConnection, endpoint string, client http.Client, req *http.Request) []byte {
+func makeRequest(c *OandaConnection, endpoint string, client http.Client, req *http.Request) ([]byte, error) {
 	req.Header.Set("User-Agent", c.headers.agent)
 	req.Header.Set("Authorization", c.headers.auth)
 	req.Header.Set("Content-Type", c.headers.contentType)
 
-	res, getErr := client.Do(req)
-	checkErr(getErr)
-	body, readErr := ioutil.ReadAll(res.Body)
-	checkErr(readErr)
-	checkApiErr(body, endpoint)
-	return body
+	res, err := client.Do(req)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	bodyString := string(body[:])
+	if strings.Contains(bodyString, "errorMessage") {
+		return []byte{}, errors.New(fmt.Sprintf("OANDA API Error: %s On route: %s", bodyString, endpoint))
+	}
+
+	return body, nil
 }

@@ -112,40 +112,76 @@ type ModifiedTrade struct {
 	LastTransactionID     string   `json:"lastTransactionID"`
 }
 
-func (c *OandaConnection) GetTradesForInstrument(instrument string) ReceivedTrades {
+func (c *OandaConnection) GetTradesForInstrument(instrument string) (ReceivedTrades, error) {
 	endpoint := "/accounts/" + c.accountID + "/trades" + "?instrument=" + instrument
 
-	response := c.Request(endpoint)
 	data := ReceivedTrades{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) GetOpenTrades() ReceivedTrades {
+func (c *OandaConnection) GetOpenTrades() (ReceivedTrades, error) {
 	endpoint := "/accounts/" + c.accountID + "/openTrades"
 
-	response := c.Request(endpoint)
 	data := ReceivedTrades{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) GetTrade(ticket string) ReceivedTrade {
+func (c *OandaConnection) GetTrade(ticket string) (ReceivedTrade, error) {
 	endpoint := "/accounts/" + c.accountID + "/trades" + "/" + ticket
 
-	response := c.Request(endpoint)
 	data := ReceivedTrade{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
 // Default is close the whole position using the string "ALL" in body.units
-func (c *OandaConnection) ReduceTradeSize(ticket string, body CloseTradePayload) ModifiedTrade {
+func (c *OandaConnection) ReduceTradeSize(ticket string, body CloseTradePayload) (ModifiedTrade, error) {
 	endpoint := "/accounts/" + c.accountID + "/trades/" + ticket
-	jsonBody, err := json.Marshal(body)
-	checkErr(err)
-	response := c.Update(endpoint, jsonBody)
+
 	data := ModifiedTrade{}
-	unmarshalJson(response, &data)
-	return data
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		return data, err
+	}
+
+	response, err := c.Put(endpoint, jsonBody)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }

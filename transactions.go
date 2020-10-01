@@ -1,6 +1,7 @@
 package goanda
 
 import (
+	"encoding/json"
 	"net/url"
 	"time"
 )
@@ -66,34 +67,56 @@ type Transactions struct {
 
 // https://golang.org/pkg/time/#Time.AddDate
 // https://play.golang.org/p/Dw7D4JJ7EC
-func (c *OandaConnection) GetTransactions(from time.Time, to time.Time) TransactionPages {
+func (c *OandaConnection) GetTransactions(from time.Time, to time.Time) (TransactionPages, error) {
 	toTime := to.Format(time.RFC3339)
 	fromTime := from.Format(time.RFC3339)
 
 	endpoint := "/accounts/" + c.accountID + "/transactions?to=" + url.QueryEscape(toTime) + "&from=" + url.QueryEscape(fromTime)
 
-	response := c.Request(endpoint)
 	data := TransactionPages{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) GetTransaction(ticket string) Transaction {
-
+func (c *OandaConnection) GetTransaction(ticket string) (Transaction, error) {
 	endpoint := "/accounts/" + c.accountID + "/transactions/" + ticket
 
-	response := c.Request(endpoint)
 	data := Transaction{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) GetTransactionsSinceId(id string) Transactions {
-
+func (c *OandaConnection) GetTransactionsSinceId(id string) (Transactions, error) {
 	endpoint := "/accounts/" + c.accountID + "/transactions/sinceid?id=" + id
 
-	response := c.Request(endpoint)
 	data := Transactions{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }

@@ -3,6 +3,7 @@ package goanda
 // Supporting OANDA docs - http://developer.oanda.com/rest-live-v20/instrument-ep/
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -103,47 +104,87 @@ type InstrumentPricing struct {
 	} `json:"prices"`
 }
 
-func (c *OandaConnection) GetCandles(instrument string, count string, granularity string) InstrumentHistory {
+func (c *OandaConnection) GetCandles(instrument string, count string, granularity string) (InstrumentHistory, error) {
 	endpoint := "/instruments/" + instrument + "/candles?count=" + count + "&granularity=" + granularity
-	candles := c.Request(endpoint)
+
 	data := InstrumentHistory{}
-	unmarshalJson(candles, &data)
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
 
-	return data
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) GetBidAskCandles(instrument string, count string, granularity string) BidAskCandles {
+func (c *OandaConnection) GetBidAskCandles(instrument string, count string, granularity string) (BidAskCandles, error) {
 	endpoint := "/instruments/" + instrument + "/candles?count=" + count + "&granularity=" + granularity + "&price=BA"
-	candles := c.Request(endpoint)
+
 	data := BidAskCandles{}
-	unmarshalJson(candles, &data)
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
 
-	return data
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) OrderBook(instrument string) BrokerBook {
+func (c *OandaConnection) OrderBook(instrument string) (BrokerBook, error) {
 	endpoint := "/instruments/" + instrument + "/orderBook"
-	orderbook := c.Request(endpoint)
-	data := BrokerBook{}
-	unmarshalJson(orderbook, &data)
 
-	return data
+	data := BrokerBook{}
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) PositionBook(instrument string) BrokerBook {
+func (c *OandaConnection) PositionBook(instrument string) (BrokerBook, error) {
 	endpoint := "/instruments/" + instrument + "/positionBook"
-	orderbook := c.Request(endpoint)
-	data := BrokerBook{}
-	unmarshalJson(orderbook, &data)
 
-	return data
+	data := BrokerBook{}
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) GetInstrumentPrice(instrument string) InstrumentPricing {
+func (c *OandaConnection) GetInstrumentPrice(instrument string) (InstrumentPricing, error) {
 	endpoint := "/accounts/" + c.accountID + "/pricing?instruments=" + instrument
-	pricing := c.Request(endpoint)
-	data := InstrumentPricing{}
-	unmarshalJson(pricing, &data)
 
-	return data
+	data := InstrumentPricing{}
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }

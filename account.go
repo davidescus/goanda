@@ -1,6 +1,7 @@
 package goanda
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -282,56 +283,104 @@ type OrderDetails struct {
 	LastTransactionID string `json:"lastTransactionID"`
 }
 
-func (c *OandaConnection) GetAccounts() AccountProperties {
+func (c *OandaConnection) GetAccounts() (AccountProperties, error) {
 	endpoint := "/accounts"
 
-	response := c.Request(endpoint)
 	data := AccountProperties{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) GetAccount(id string) AccountInfo {
+func (c *OandaConnection) GetAccount(id string) (AccountInfo, error) {
 	endpoint := "/accounts/" + id
 
-	response := c.Request(endpoint)
 	data := AccountInfo{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) GetOrderDetails(instrument string, units string) OrderDetails {
+func (c *OandaConnection) GetOrderDetails(instrument string, units string) (OrderDetails, error) {
 	endpoint := "/accounts/" + c.accountID + "/orderEntryData?disableFiltering=true&instrument=" + instrument + "&orderPositionFill=DEFAULT&units=" + units
-	orderDetails := c.Request(endpoint)
-	data := OrderDetails{}
-	unmarshalJson(orderDetails, &data)
 
-	return data
+	data := OrderDetails{}
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) GetAccountSummary() AccountSummary {
+func (c *OandaConnection) GetAccountSummary() (AccountSummary, error) {
 	endpoint := "/accounts/" + c.accountID + "/summary"
 
-	response := c.Request(endpoint)
 	data := AccountSummary{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) GetAccountInstruments(id string) AccountInstruments {
+func (c *OandaConnection) GetAccountInstruments(id string) (AccountInstruments, error) {
 	endpoint := "/accounts/" + id + "/instruments"
 
-	response := c.Request(endpoint)
 	data := AccountInstruments{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
 
-func (c *OandaConnection) GetAccountChanges(id string, transactionId string) AccountChanges {
+func (c *OandaConnection) GetAccountChanges(id string, transactionId string) (AccountChanges, error) {
 	endpoint := "/accounts/" + id + "/changes?sinceTransactionID=" + transactionId
 
-	response := c.Request(endpoint)
 	data := AccountChanges{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }

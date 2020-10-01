@@ -1,6 +1,7 @@
 package goanda
 
 import (
+	"encoding/json"
 	"net/url"
 	"strings"
 	"time"
@@ -48,12 +49,20 @@ type Pricings struct {
 	} `json:"prices"`
 }
 
-func (c *OandaConnection) GetPricingForInstruments(instruments []string) Pricings {
+func (c *OandaConnection) GetPricingForInstruments(instruments []string) (Pricings, error) {
 	instrumentString := strings.Join(instruments, ",")
 	endpoint := "/accounts/" + c.accountID + "/pricing?instruments=" + url.QueryEscape(instrumentString)
 
-	response := c.Request(endpoint)
 	data := Pricings{}
-	unmarshalJson(response, &data)
-	return data
+	response, err := c.Get(endpoint)
+	if err != nil {
+		return data, err
+	}
+
+	err = json.Unmarshal(response, &data)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
 }
