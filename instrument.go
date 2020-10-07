@@ -108,11 +108,16 @@ func (c *OandaConnection) GetCandles(
 	instrument string,
 	count string,
 	granularity string,
-	from string,
+	from time.Time,
+	to time.Time,
 ) (InstrumentHistory, error) {
 	endpoint := "/instruments/" + instrument + "/candles?count=" + count + "&granularity=" + granularity
-	if from != "" {
-		endpoint += "&from=" + from
+	if !from.IsZero() {
+		endpoint += "&from=" + from.Format(time.RFC3339)
+	}
+
+	if !to.IsZero() {
+		endpoint += "&to=" + to.Format(time.RFC3339)
 	}
 
 	data := InstrumentHistory{}
