@@ -104,8 +104,16 @@ type InstrumentPricing struct {
 	} `json:"prices"`
 }
 
-func (c *OandaConnection) GetCandles(instrument string, count string, granularity string) (InstrumentHistory, error) {
+func (c *OandaConnection) GetCandles(
+	instrument string,
+	count string,
+	granularity string,
+	from string,
+) (InstrumentHistory, error) {
 	endpoint := "/instruments/" + instrument + "/candles?count=" + count + "&granularity=" + granularity
+	if from != "" {
+		endpoint += "&from=" + from
+	}
 
 	data := InstrumentHistory{}
 	response, err := c.Get(endpoint)
