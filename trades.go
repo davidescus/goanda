@@ -67,7 +67,6 @@ type ModifiedTrade struct {
 		Instrument     string `json:"instrument"`
 		Units          string `json:"units"`
 		Price          string `json:"price"`
-		FullPrice      string `json:"fullPrice"`
 		PL             string `json:"pl"`
 		Financing      string `json:"financing"`
 		Commission     string `json:"commission"`
