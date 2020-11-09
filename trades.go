@@ -165,7 +165,7 @@ func (c *OandaConnection) GetTrade(ticket string) (ReceivedTrade, error) {
 
 // Default is close the whole position using the string "ALL" in body.units
 func (c *OandaConnection) ReduceTradeSize(ticket string, body CloseTradePayload) (ModifiedTrade, error) {
-	endpoint := "/accounts/" + c.accountID + "/trades/" + ticket
+	endpoint := "/accounts/" + c.accountID + "/trades/" + ticket + "/close"
 
 	data := ModifiedTrade{}
 	jsonBody, err := json.Marshal(body)
